@@ -18,7 +18,7 @@ var radioButtonUnit = [1, 1, 1, 1];
 var lastMagicNumber = ["", "", "", ""]; //contains the last called magic number per tab
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
 const dailyMagicNumbers = ["B20D1AD6", "05C7CFB1", "CA6D6472", "E04C3900", "FCF4E78D", "0DF164DE"];
@@ -89,196 +89,188 @@ mapHeadlineText.set("5293B668", "5 minute values for SoC.");
 mapHeadlineText.set("76C9A0BD", "5 minute values for SoC target.");
 
 function getDataSuccess(returnData) {
-  var resultJson = JSON.parse(returnData);
-  let currentTab = app.tabActive;
-  lastDataSet[currentTab] = resultJson.valueArray;
-  lastMagicNumber[currentTab] = resultJson.magicNumber;
+    var resultJson = JSON.parse(returnData);
+    let currentTab = app.tabActive;
+    lastDataSet[currentTab] = resultJson.valueArray;
+    lastMagicNumber[currentTab] = resultJson.magicNumber;
 
-  switch(currentTab)
-  {
-    case 0:
-      app.chartTitle0 = mapHeadlineText.get(resultJson.magicNumber);
-      break;
-    case 1:
-      app.chartTitle1 = mapHeadlineText.get(resultJson.magicNumber);
-      break;
-    case 2:
-      app.chartTitle2 = mapHeadlineText.get(resultJson.magicNumber);
-      break;
-    case 3:
-      app.chartTitle3 = mapHeadlineText.get(resultJson.magicNumber);
-      break;
-  }
+    switch (currentTab) {
+        case 0:
+            app.chartTitle0 = mapHeadlineText.get(resultJson.magicNumber);
+            break;
+        case 1:
+            app.chartTitle1 = mapHeadlineText.get(resultJson.magicNumber);
+            break;
+        case 2:
+            app.chartTitle2 = mapHeadlineText.get(resultJson.magicNumber);
+            break;
+        case 3:
+            app.chartTitle3 = mapHeadlineText.get(resultJson.magicNumber);
+            break;
+    }
 
-  refreshChart(radioButtonUnit[currentTab]);
+    refreshChart(radioButtonUnit[currentTab]);
 }
 
-function refreshChart(newUnitConvertFactor)
-{
-  let timezoneOffset = new Date().getTimezoneOffset() * 60000; //offset given in minutes, need ms
-  let currentTab = app.tabActive;
-  let chartObject = "chart" + currentTab;
-  let dataObject = "data" + currentTab;
+function refreshChart(newUnitConvertFactor) {
+    let timezoneOffset = new Date().getTimezoneOffset() * 60000; //offset given in minutes, need ms
+    let currentTab = app.tabActive;
+    let chartObject = "chart" + currentTab;
+    let dataObject = "data" + currentTab;
 
-  this[chartObject].detach();       //need dynamic access to chart object and data depending on active tab not to change any data on the other tabs
-  this[dataObject].labels = [];
-  this[dataObject].series[0] = [];
+    this[chartObject].detach();       //need dynamic access to chart object and data depending on active tab not to change any data on the other tabs
+    this[dataObject].labels = [];
+    this[dataObject].series[0] = [];
 
-  for (var i = 0; i < lastDataSet[currentTab].length; i++) {
+    for (var i = 0; i < lastDataSet[currentTab].length; i++) {
 
-    let timeMs = lastDataSet[currentTab][i].timestamp + timezoneOffset; //time comes in UTC, assuming that inverter and client is in same timezone, so just take offset of client
-    let time = new Date(timeMs);
-    let value = lastDataSet[currentTab][i].value / newUnitConvertFactor;
+        let timeMs = lastDataSet[currentTab][i].timestamp + timezoneOffset; //time comes in UTC, assuming that inverter and client is in same timezone, so just take offset of client
+        let time = new Date(timeMs);
+        let value = lastDataSet[currentTab][i].value / newUnitConvertFactor;
 
-    let day = time.getDate().toString();
-    let month = monthNames[(time.getMonth())];
-    let year = time.getFullYear();
-    let hours = time.getHours();
-    let minutesUncut = "00" + time.getMinutes();
-    let minutes = minutesUncut.substr(minutesUncut.length-2);
+        let day = time.getDate().toString();
+        let month = monthNames[(time.getMonth())];
+        let year = time.getFullYear();
+        let hours = time.getHours();
+        let minutesUncut = "00" + time.getMinutes();
+        let minutes = minutesUncut.substr(minutesUncut.length - 2);
 
-    if (dailyMagicNumbers.indexOf(lastMagicNumber[currentTab]) > -1) {
-      this[dataObject].labels.push(month + '-' + day);
-    } else if (monthlyMagicNumbers.indexOf(lastMagicNumber[currentTab]) > -1){
-      this[dataObject].labels.push(month);
-    }else if (yearlyMagicNumbers.indexOf(lastMagicNumber[currentTab]) > -1){
-      this[dataObject].labels.push(year);
+        if (dailyMagicNumbers.indexOf(lastMagicNumber[currentTab]) > -1) {
+            this[dataObject].labels.push(month + '-' + day);
+        } else if (monthlyMagicNumbers.indexOf(lastMagicNumber[currentTab]) > -1) {
+            this[dataObject].labels.push(month);
+        } else if (yearlyMagicNumbers.indexOf(lastMagicNumber[currentTab]) > -1) {
+            this[dataObject].labels.push(year);
+        } else {  //5 minute values
+            this[dataObject].labels.push(hours + ":" + minutes);
+        }
+        this[dataObject].series[0].push(value);
     }
-    else {  //5 minute values
-      this[dataObject].labels.push(hours+":"+minutes);
-    }
-    this[dataObject].series[0].push(value);
-  }
 
-  this[chartObject].update();
-  app.showAlertBar("Data updated successfully.", 3, "info");
+    this[chartObject].update();
+    app.showAlertBar("Data updated successfully.", 3, "info");
 }
 
-function getDataError(jqXHR, textStatus, errorThrown)
-{
-  var resultJson = JSON.parse(jqXHR.responseText);
-  app.showAlertBar("Response code " + jqXHR.status + ": " + resultJson.text, 7, "danger");
+function getDataError(jqXHR, textStatus, errorThrown) {
+    var resultJson = JSON.parse(jqXHR.responseText);
+    app.showAlertBar("Response code " + jqXHR.status + ": " + resultJson.text, 7, "danger");
 }
 
 function loadData(magicNumber) {
-  //this.app.__vue__.showvarT();
-  let d = new Date();
-  let timestampUTC = Math.trunc(d.getTime() / 1000); //for RCT need timestamp in s
-  let timezoneOffset = d.getTimezoneOffset() * 60; //offset given in minutes, need s
-  let timestamp = timestampUTC - timezoneOffset;
+    //this.app.__vue__.showvarT();
+    let d = new Date();
+    let timestampUTC = Math.trunc(d.getTime() / 1000); //for RCT need timestamp in s
+    let timezoneOffset = d.getTimezoneOffset() * 60; //offset given in minutes, need s
+    let timestamp = timestampUTC - timezoneOffset;
 
-  $.ajax({
-    url: "/getData/?magicNumber=" + magicNumber + "&timestamp=" + timestamp,
-    type: "GET",
-    success: getDataSuccess,
-    error: getDataError,
-    async: true
-  });
+    $.ajax({
+        url: "/getData/?magicNumber=" + magicNumber + "&timestamp=" + timestamp,
+        type: "GET",
+        success: getDataSuccess,
+        error: getDataError,
+        async: true
+    });
 
 }
 
 
-
 function buildPage() {
-  app = new Vue({
-    el: '#app',
-    data: {
-      radioButtonUnit0: '1', //value of the radio button to select the unit
-      radioButtonUnit1: '1',
-      radioButtonUnit2: '1',
-      radioButtonUnit3: '1',
-      alertShow: 0,
-      alertText: "",
-      alertVariant: "info",
-      headline: "",
-      tabActive: 0,
-      chartTitle0: "Select your chart",
-      chartTitle1: "Select your chart",
-      chartTitle2: "Select your chart",
-      chartTitle3: "Select your chart"
-    },
-    methods: {
-      showAlertBar: function(text, time, variant) {
-        this.alertShow = time;
-        this.alertText = text;
-        this.alertVariant = variant;
-      },
-      onClickBtnLoadData: function(magicNumber) { //text in map aufnehmen und in eigenes file auslagern https://flaviocopes.com/es-modules/
-        //alert('ausgabe ' +  this.selCalView  );
-        app.showAlertBar(mapMessageText.get(magicNumber), 30, "info");
-        this.headline = mapHeadlineText.get(magicNumber); // change value for {{headline}} currently not used
-        loadData(magicNumber);
-      },
-      changeUnit: function(newUnitConvertFactor)
-      {
-        radioButtonUnit[app.tabActive] = newUnitConvertFactor;
-        refreshChart(newUnitConvertFactor); //data element radioButtonUnit will only change once that method has finished
-      },
-      changeTab: function(newTab)
-      {
+    app = new Vue({
+        el: '#app',
+        data: {
+            radioButtonUnit0: '1', //value of the radio button to select the unit
+            radioButtonUnit1: '1',
+            radioButtonUnit2: '1',
+            radioButtonUnit3: '1',
+            alertShow: 0,
+            alertText: "",
+            alertVariant: "info",
+            headline: "",
+            tabActive: 0,
+            chartTitle0: "Select your chart",
+            chartTitle1: "Select your chart",
+            chartTitle2: "Select your chart",
+            chartTitle3: "Select your chart"
+        },
+        methods: {
+            showAlertBar: function (text, time, variant) {
+                this.alertShow = time;
+                this.alertText = text;
+                this.alertVariant = variant;
+            },
+            onClickBtnLoadData: function (magicNumber) { //text in map aufnehmen und in eigenes file auslagern https://flaviocopes.com/es-modules/
+                //alert('ausgabe ' +  this.selCalView  );
+                app.showAlertBar(mapMessageText.get(magicNumber), 30, "info");
+                this.headline = mapHeadlineText.get(magicNumber); // change value for {{headline}} currently not used
+                loadData(magicNumber);
+            },
+            changeUnit: function (newUnitConvertFactor) {
+                radioButtonUnit[app.tabActive] = newUnitConvertFactor;
+                refreshChart(newUnitConvertFactor); //data element radioButtonUnit will only change once that method has finished
+            },
+            changeTab: function (newTab) {
 
-        //cannot clear chart in this method, needs clarification why.
-        //loadData(dailyMagicNumbers[newTab]);
-        //alert("new tab " + newTab);
+                //cannot clear chart in this method, needs clarification why.
+                //loadData(dailyMagicNumbers[newTab]);
+                //alert("new tab " + newTab);
 
-        //empty current chart, we don't know what chart the user wants to see next
-        // chart.detach();
-        // data.labels = ["bla"];
-        // data.series[0] = [1];
-        // chart.update();
-        //alert("tab ende");
+                //empty current chart, we don't know what chart the user wants to see next
+                // chart.detach();
+                // data.labels = ["bla"];
+                // data.series[0] = [1];
+                // chart.update();
+                //alert("tab ende");
 
-        //clearChart();
-      },
-      onClickInfo: function()
-      {
-        alert("This software is provided as is. It is not any official software provided by RCT Power. The author of this software is not affiliated to RCT Power in any way.");
-      }
-    }
-  })
+                //clearChart();
+            },
+            onClickInfo: function () {
+                alert("This software is provided as is. It is not any official software provided by RCT Power. The author of this software is not affiliated to RCT Power in any way.");
+            }
+        }
+    })
 
-  data0 = {
-    // A labels array that can contain any sort of values
-    labels: [],
-    // Our series array that contains series objects or in this case series data arrays
-    series: [
-      []
-    ]
-  };
+    data0 = {
+        // A labels array that can contain any sort of values
+        labels: [],
+        // Our series array that contains series objects or in this case series data arrays
+        series: [
+            []
+        ]
+    };
 
-  data1 = {
-    // A labels array that can contain any sort of values
-    labels: [],
-    // Our series array that contains series objects or in this case series data arrays
-    series: [
-      []
-    ]
-  };
+    data1 = {
+        // A labels array that can contain any sort of values
+        labels: [],
+        // Our series array that contains series objects or in this case series data arrays
+        series: [
+            []
+        ]
+    };
 
-  data2 = {
-    // A labels array that can contain any sort of values
-    labels: [],
-    // Our series array that contains series objects or in this case series data arrays
-    series: [
-      []
-    ]
-  };
+    data2 = {
+        // A labels array that can contain any sort of values
+        labels: [],
+        // Our series array that contains series objects or in this case series data arrays
+        series: [
+            []
+        ]
+    };
 
-  data3 = {
-    // A labels array that can contain any sort of values
-    labels: [],
-    // Our series array that contains series objects or in this case series data arrays
-    series: [
-      []
-    ]
-  };
+    data3 = {
+        // A labels array that can contain any sort of values
+        labels: [],
+        // Our series array that contains series objects or in this case series data arrays
+        series: [
+            []
+        ]
+    };
 
-  //Create a new line chart object where as first parameter we pass in a selector
-  //that is resolving to our chart container element. The Second parameter
-  //is the actual data object.
-  chart0 = new Chartist.Bar('#chart0', data0);
-  chart1 = new Chartist.Bar('#chart1', data1);
-  chart2 = new Chartist.Bar('#chart2', data2);
-  chart3 = new Chartist.Bar('#chart3', data3);
+    //Create a new line chart object where as first parameter we pass in a selector
+    //that is resolving to our chart container element. The Second parameter
+    //is the actual data object.
+    chart0 = new Chartist.Bar('#chart0', data0);
+    chart1 = new Chartist.Bar('#chart1', data1);
+    chart2 = new Chartist.Bar('#chart2', data2);
+    chart3 = new Chartist.Bar('#chart3', data3);
 
 }

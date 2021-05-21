@@ -10,12 +10,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
   <version>0.1.2</version>
   <name>RCT Data Server</name>
   <description>Server to read data from RCT Inverter</description>
-  
-  
-  	<parent>
+
+
+	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.0.RELEASE</version>
+		<version>2.4.5</version>
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
 	<dependencies>
@@ -29,25 +30,23 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<artifactId>gson</artifactId>
 			<version>${gson.version}</version>
 		</dependency>
-		
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.8.2</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.8.2</version>
-        </dependency>
-		
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.0.16.Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+		</dependency>
+
 	</dependencies>
 
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>11</java.version>
 	</properties>
 
 	<build>
@@ -58,7 +57,5 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			</plugin>
 		</plugins>
 	</build>
-  
-  
-  
+
 </project>
