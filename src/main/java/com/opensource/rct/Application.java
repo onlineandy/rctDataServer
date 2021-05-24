@@ -4,6 +4,8 @@ import com.opensource.rct.application.ConfigParameter;
 import com.opensource.rct.application.Inverter;
 import com.opensource.rct.model.MagicNumber;
 import com.opensource.rct.timertasks.PollData;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Locale;
 import java.util.Timer;
 
 /**
@@ -47,6 +50,9 @@ public class Application {
     @Autowired
     private PollData pollData;
 
+    @Autowired
+    MeterRegistry meterRegistry;
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -57,7 +63,8 @@ public class Application {
         logger.info("<<<<< INFO >>>>> Application::Main: RCT data server has been started. Going to connect to inverter...");
         inverter.connect();
         if (StringUtils.hasLength(config.getHostnameInfluxDb())) {
-            pollData.active = true;
+            logger.info("InfluxDB active.");
+            pollData.activeInfluxDB = true;
         }
     }
 
@@ -83,6 +90,7 @@ public class Application {
                         magicNumberObject.setMeasurementName(inputArray[4]);
                         if (inputArray[4] != null && !inputArray[4].trim().equalsIgnoreCase("")) {
                             MagicNumber.magicNumbersToBeRead.add(inputArray[0]);    //add magic number to be polled for
+                            Gauge.builder(getMetricName(magicNumberObject), magicNumberObject, m -> getValue(m)).register(meterRegistry);
                         }
                     }
                     MagicNumber.magicNumberObjectMap.put(inputArray[0], magicNumberObject);
@@ -94,5 +102,18 @@ public class Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private int getValue(MagicNumber m) {
+        return m.getDataJson() != null ? Math.round(m.getDataJson().get("value").getAsFloat()) : 0;
+    }
+
+    private String getMetricName(MagicNumber magicNumberObject) {
+        String prefix = "rct";
+        String name = magicNumberObject.getMeasurementName();
+        if (Character.isLowerCase(name.charAt(0))) {
+            prefix = "rct_";
+        }
+        return prefix + name.replaceAll("([A-Z])","_$1").toLowerCase();
     }
 }

@@ -1,10 +1,10 @@
 1AC87AA0;Current house power usage in W;short;rctdb;PowerHouse
 91617C58;Public grid power in W negativ if feed in;short;rctdb;PowerGrid
-DB11855B;DC input power A in W;short;rctdb;PowerDcInput
-0CB5D21B;DC input power B in W;short;rctdb;PowerDcInput
-B55BA2CE;DC input voltage A in V;short;rctdb;voltage
-B0041187;DC input voltage B in V;short;rctdb;voltage
-A7FA5C5D;Battery voltage in V;short;rctdb;voltage
+DB11855B;DC input power A in W;short;rctdb;PowerDcInputA
+0CB5D21B;DC input power B in W;short;rctdb;PowerDcInputB
+B55BA2CE;DC input voltage A in V;short;rctdb;voltageA
+B0041187;DC input voltage B in V;short;rctdb;voltageB
+A7FA5C5D;Battery voltage in V;short;rctdb;voltageBat
 BD55905F;Eac - Energy today in Wh ;short;rctdb;
 10970E9D;Eac - Energy this month in Wh;short;rctdb;
 C0CC81B6;Eac - Energy this year in Wh ;short;rctdb;
@@ -18,7 +18,7 @@ CF053085;Phase L1 Voltage in V;short;rctdb;voltage
 54B4684E;Phase L2 Voltage in V;short;rctdb;voltage
 2545E22D;Phase L3 Voltage in V;short;rctdb;voltage
 B408E40A;Battery current measured by inverter, low pass filter with Tau = 1s in A;short;rctdb;
-902AFAFB;Battery temperature in C;short;rctdb;
+902AFAFB;Battery temperature in C;short;rctdb;BatteryTemp
 2AE703F2;Energy today in Wh input A;short;rctdb;EnergyTodayA
 FBF3CE97;Energy today in Wh input B;short;rctdb;EnergyTodayB
 3C87C4F5;Energy feed into public grid today in Wh;short;rctdb;EnergyGridFeedToday
@@ -34,8 +34,8 @@ BD55D796;Energy this year input B in Wh;short;rctdb;EnergyCurrentYearB
 26EFFC2F;Energy feed into public grid this year in Wh;short;rctdb;EnergyGridFeedThisYear
 DE17F021;Energy taken from public grid this year in Wh;short;rctdb;EnergyGridReceivedThisYear
 C7D3B479;Energy used this year in Wh;short;rctdb;EnergyUsedThisYear
-FC724A9E;Energy total input A in Wh;short;rctdb;
-68EEFD3D;Energy total input B in Wh;short;rctdb;
+FC724A9E;Energy total input A in Wh;short;rctdb;EnergyTotalA
+68EEFD3D;Energy total input B in Wh;short;rctdb;EnergyTotalB
 44D4C533;Energy feed into public grid total in Wh;short;rctdb;EnergyGridFeedTotal
 62FBE7DC;Energy taken from public grid total in Wh;short;rctdb;EnergyGridReceivedTotal
 EFF4B537;Energy used total in Wh;short;rctdb;EnergyUsedTotal
@@ -48,7 +48,7 @@ BD008E29;External Battery power target in W positive is discharge;short;rctdb;po
 3B7FCD47;Bit coded fault word 2;short;rctdb;
 7F813D73;Bit coded fault word 3;short;rctdb;
 8FC89B10;Service Variable;short;rctdb;
-1C4A665F;Public grid frequency in Hz;short;rctdb;
+1C4A665F;Public grid frequency in Hz;short;rctdb;GridFrequency
 63476DBE;Public grid phase to phase L1-L2 voltage [V];short;rctdb;
 485AD749;Public grid phase to phase L2-L3 voltage [V];short;rctdb;
 F25C339B;Public grid phase to phase L3-L1 voltage [V];short;rctdb;
@@ -78,8 +78,8 @@ FBF6D834;Battery stack 0 serial number;string;rctdb;
 3623D82A;Grid-separated;short;rctdb;
 DC667958;Battery state machine;short;rctdb;
 36A9E9A6;Utilize external Inverter energy. [True/False];short;rctdb;
-701A0482;Solar generator A connected [True/False];short;rctdb;
-FED51BD2;Solar generator B connected [True/False];short;rctdb;
+701A0482;Solar generator A connected [True/False];short;rctdb;connectedA
+FED51BD2;Solar generator B connected [True/False];short;rctdb;connectedB
 99EE89CB;Power limit source (enum);short;rctdb;
 70A2AF4F;battery.bat_status (int);short;rctdb;
 5B10CE81;HeiPhoss mode (int);short;rctdb;

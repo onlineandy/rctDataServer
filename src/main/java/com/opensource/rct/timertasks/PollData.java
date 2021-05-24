@@ -6,16 +6,13 @@ import com.opensource.rct.model.MagicNumber;
 import com.opensource.rct.storage.Influxdb;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tomcat.jni.Poll;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Calendar;
-import java.util.TimerTask;
 
 
 /**
@@ -31,21 +28,16 @@ public class PollData {
     private static final Logger logger = LogManager.getLogger();
     private final ConfigParameter config;
     private final Influxdb influxdb;
-    public boolean active = false;
+    public boolean activeInfluxDB = false;
 
     public PollData(ConfigParameter config, Influxdb influxdb) {
         this.config = config;
         this.influxdb = influxdb;
     }
 
-    @Scheduled(initialDelay = 5000, fixedDelay = 1000)
+    @Scheduled(initialDelay = 5000, fixedDelay = 5000)
     public void run() {
-        if (active && !influxdb.initInfluxDB()) {
-            active = false;
-        }
-        if (!active) return;
-
-        logger.debug("<<<<< DEBUG >>>>> PollData::run Timer triggered.");
+        logger.info("<<<<< INFO >>>>> PollData::run Timer triggered.");
 
         for (String magicNumber : MagicNumber.magicNumbersToBeRead) {
             MagicNumber.magicNumberObjectMap.get(magicNumber).setDataReady(false);    //before requesting data set data ready to false
@@ -53,7 +45,7 @@ public class PollData {
             byte[] requestBytes = Helper.buildRequestByteArrayDataLoggerShort(magicNumber);
             boolean newDataReceived = sendRequestToInverter(requestBytes, magicNumber); //finally communicate with inverter
 
-            if (newDataReceived) {
+            if (activeInfluxDB && newDataReceived) {
                 logger.debug("<<<<< DEBUG >>>>> PollData::run Received new data to be sent to Influx DB.");
                 influxdb.postData2Influx(
                         MagicNumber.magicNumberObjectMap.get(magicNumber).getDataJson().get("timestamp").getAsLong(),

@@ -3,6 +3,8 @@ package com.opensource.rct.application;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.opensource.rct.model.MagicNumber;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,12 @@ public class Inverter {
     private Thread tcpConnectionThread = null;
     private JsonObject dataStorage;
     private ConfigParameter config;
+    private MeterRegistry meterRegistry;
 
 
-    public Inverter(ConfigParameter config) {
+    public Inverter(ConfigParameter config, MeterRegistry meterRegistry) {
         this.config = config;
+        this.meterRegistry = meterRegistry;
     }
 
     public void connect() {
@@ -306,22 +310,25 @@ public class Inverter {
 
             if (MagicNumber.magicNumberObjectMap.containsKey(key)) {
                 logger.debug("<<<<< DEBUG >>>>> Inverter::processResultString key listed: " + key);
-                if (MagicNumber.magicNumberObjectMap.get(key).getDataType().equalsIgnoreCase("short")) {
+                MagicNumber magicNumber = MagicNumber.magicNumberObjectMap.get(key);
+                logger.debug("---> " + magicNumber.getMeasurementName() + " (" + magicNumber.getDataType() + ") = " + valueString);
+                if (magicNumber.getDataType().equalsIgnoreCase("short")) {
                     Long i = Long.parseLong(valueString, 16);
                     Float valueFloat = Float.intBitsToFloat(i.intValue());
                     dataStorage.addProperty("type", "short");
                     dataStorage.addProperty("magicNumber", key);
                     dataStorage.addProperty("value", valueFloat);
-                    dataStorage.addProperty("text", MagicNumber.magicNumberObjectMap.get(key).getDescription());
+                    dataStorage.addProperty("text", magicNumber.getDescription());
                     dataStorage.addProperty("timestamp", Calendar.getInstance().getTimeInMillis() / 1000);
 
                     boolean validValue = runSanityCheck(key, valueFloat);
 
                     dataStorage.addProperty("sucess", validValue);
 
-                    MagicNumber.magicNumberObjectMap.get(key).setDataJson(dataStorage);
-                    MagicNumber.magicNumberObjectMap.get(key).setDataReady(true);
-                } else if (MagicNumber.magicNumberObjectMap.get(key).getDataType().equalsIgnoreCase("long")) {
+                    magicNumber.setDataJson(dataStorage);
+                    magicNumber.setDataReady(true);
+                    logger.debug(magicNumber.getMeasurementName() + " = " + valueFloat);
+                } else if (magicNumber.getDataType().equalsIgnoreCase("long")) {
                     JsonArray dataArray = new JsonArray();
 
                     valueString = valueString.substring(8, valueString.length()); //The first 4 bytes are the requsted timestamp, not needed for the response
@@ -346,23 +353,23 @@ public class Inverter {
                     dataStorage.add("valueArray", dataArray);
                     dataStorage.addProperty("magicNumber", key);
                     dataStorage.addProperty("type", "long");
-                    dataStorage.addProperty("text", MagicNumber.magicNumberObjectMap.get(key).getDescription());
-                    MagicNumber.magicNumberObjectMap.get(key).setDataJson(dataStorage);
-                    MagicNumber.magicNumberObjectMap.get(key).setDataReady(true);
-                } else if (MagicNumber.magicNumberObjectMap.get(key).getDataType().equalsIgnoreCase("unknown"))    //to cover the case that we know that a magic number exists but we don't know its meaning
+                    dataStorage.addProperty("text", magicNumber.getDescription());
+                    magicNumber.setDataJson(dataStorage);
+                    magicNumber.setDataReady(true);
+                } else if (magicNumber.getDataType().equalsIgnoreCase("unknown"))    //to cover the case that we know that a magic number exists but we don't know its meaning
                 {
                     logger.debug("<<<<< DEBUG >>>>> Inverter::processResultString string contains unknown magic number: " + key);
                     dataStorage.addProperty("magicNumber", key);
                     dataStorage.addProperty("type", "unknown");
-                    MagicNumber.magicNumberObjectMap.get(key).setDataJson(dataStorage);
-                    MagicNumber.magicNumberObjectMap.get(key).setDataReady(true);
-                } else if (MagicNumber.magicNumberObjectMap.get(key).getDataType().equalsIgnoreCase("string")) {
+                    magicNumber.setDataJson(dataStorage);
+                    magicNumber.setDataReady(true);
+                } else if (magicNumber.getDataType().equalsIgnoreCase("string")) {
                     logger.debug("<<<<< DEBUG >>>>> Inverter::processResultString string contains magic number representing a string value not a number: " + key);
                     dataStorage.addProperty("magicNumber", key);
                     dataStorage.addProperty("type", "String");
-                    dataStorage.addProperty("text", MagicNumber.magicNumberObjectMap.get(key).getDescription());
-                    MagicNumber.magicNumberObjectMap.get(key).setDataJson(dataStorage);
-                    MagicNumber.magicNumberObjectMap.get(key).setDataReady(true);
+                    dataStorage.addProperty("text", magicNumber.getDescription());
+                    magicNumber.setDataJson(dataStorage);
+                    magicNumber.setDataReady(true);
                     //don't do anything, we know that this value is a string //TODO: Implement later
                 }
             } else {
