@@ -90,7 +90,7 @@ public class Application {
                         magicNumberObject.setMeasurementName(inputArray[4]);
                         if (inputArray[4] != null && !inputArray[4].trim().equalsIgnoreCase("")) {
                             MagicNumber.magicNumbersToBeRead.add(inputArray[0]);    //add magic number to be polled for
-                            Gauge.builder(getMetricName(magicNumberObject), magicNumberObject, m -> getValue(m)).register(meterRegistry);
+                            Gauge.builder(getMetricName(magicNumberObject), magicNumberObject, this::getValue).register(meterRegistry);
                         }
                     }
                     MagicNumber.magicNumberObjectMap.put(inputArray[0], magicNumberObject);
@@ -104,8 +104,8 @@ public class Application {
         }
     }
 
-    private int getValue(MagicNumber m) {
-        return m.getDataJson() != null ? Math.round(m.getDataJson().get("value").getAsFloat()) : 0;
+    private float getValue(MagicNumber m) {
+        return m.getDataJson() != null ? m.getDataJson().get("value").getAsFloat() : 0;
     }
 
     private String getMetricName(MagicNumber magicNumberObject) {
