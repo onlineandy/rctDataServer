@@ -1,22 +1,21 @@
 1AC87AA0;Current house power usage in W;short;rctdb;PowerHouse
 91617C58;Public grid power in W negativ if feed in;short;rctdb;PowerGrid
+6A9FFA2;Total charge into from battery;short;rctdb;BatCharge
+2BC1E72B;Total charge flow from battery;short;rctdb;BatDischarge
 DB11855B;DC input power A in W;short;rctdb;PowerDcInputA
 0CB5D21B;DC input power B in W;short;rctdb;PowerDcInputB
 B55BA2CE;DC input voltage A in V;short;rctdb;voltageA
 B0041187;DC input voltage B in V;short;rctdb;voltageB
 A7FA5C5D;Battery voltage in V;short;rctdb;voltageBat
-BD55905F;Eac - Energy today in Wh ;short;rctdb;
-10970E9D;Eac - Energy this month in Wh;short;rctdb;
-C0CC81B6;Eac - Energy this year in Wh ;short;rctdb;
+BD55905F;Eac - Energy today in Wh ;short;rctdb;EnergySolarToday
+10970E9D;Eac - Energy this month in Wh;short;rctdb;EnergySolarMonth
+C0CC81B6;Eac - Energy this year in Wh ;short;rctdb;EnergySolarYear
 B1EF67CE;Eac - Total energy in Wh ;short;rctdb;EnergyTotal
-DB2D69AE;Current AC power of inverter in W;short;rctdb;power
+DB2D69AE;Current AC power of inverter in W;short;rctdb;PowerAcInverter
 959930BF;State of charge (SoC) 1st battery;short;rctdb;soc
-8B9FF008;Upper load boundary of battery in %;short;rctdb;
+8B9FF008;Upper load boundary of battery in %;short;rctdb;BatUpperBound
 400F015B;Battery power in W (positiv discharge negative charge);short;rctdb;PowerBattery
 E96F1844;External power (additional inverters/generators in house internal grid) in W;short;rctdb;
-CF053085;Phase L1 Voltage in V;short;rctdb;voltage
-54B4684E;Phase L2 Voltage in V;short;rctdb;voltage
-2545E22D;Phase L3 Voltage in V;short;rctdb;voltage
 B408E40A;Battery current measured by inverter, low pass filter with Tau = 1s in A;short;rctdb;
 902AFAFB;Battery temperature in C;short;rctdb;BatteryTemp
 2AE703F2;Energy today in Wh input A;short;rctdb;EnergyTodayA
@@ -53,7 +52,7 @@ BD008E29;External Battery power target in W positive is discharge;short;rctdb;po
 485AD749;Public grid phase to phase L2-L3 voltage [V];short;rctdb;
 F25C339B;Public grid phase to phase L3-L1 voltage [V];short;rctdb;
 C717D1FB;Total system insulation in Ohm;short;rctdb;
-5F33284E;Inverter actual state;short;rctdb;
+5F33284E;Inverter actual state;short;rctdb;InverterState
 9D785E8C;Battery BMS main software version;short;rctdb;
 1B39A3A3;Battery BMS power software version;short;rctdb;
 6388556C;Battery stack 0 software version;short;rctdb;

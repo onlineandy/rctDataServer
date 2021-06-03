@@ -37,7 +37,7 @@ public class PollData {
 
     @Scheduled(initialDelay = 5000, fixedDelay = 5000)
     public void run() {
-        logger.info("<<<<< INFO >>>>> PollData::run Timer triggered.");
+        logger.debug("<<<<< DEBUG >>>>> PollData::run Timer triggered.");
 
         for (String magicNumber : MagicNumber.magicNumbersToBeRead) {
             MagicNumber.magicNumberObjectMap.get(magicNumber).setDataReady(false);    //before requesting data set data ready to false

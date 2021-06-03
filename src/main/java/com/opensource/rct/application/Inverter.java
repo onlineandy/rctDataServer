@@ -22,7 +22,7 @@ public class Inverter {
     int requestedDataArrayPosition;
     private Socket inverterSocket;
     private Thread tcpConnectionThread = null;
-    private JsonObject dataStorage;
+
     private ConfigParameter config;
     private MeterRegistry meterRegistry;
 
@@ -39,55 +39,49 @@ public class Inverter {
             logger.info("<<<<< INFO >>>>> Inverter::connect Connected successfully to inverter.");
 
             tcpConnectionThread = new Thread(
-                    new Runnable() {
-                        public void run() {
-                            int bufferSize = 4000;
-                            while (!Thread.interrupted()) {
-                                byte[] bBuffer = new byte[bufferSize];    //TODO: Check if 4000 is enough or if we can use a dynamic size
-                                try {
-                                    int size = inverterSocket.getInputStream().read(bBuffer);
+                    () -> {
+                        int bufferSize = 4000;
+                        while (!Thread.interrupted()) {
+                            byte[] bBuffer = new byte[bufferSize];    //TODO: Check if 4000 is enough or if we can use a dynamic size
+                            try {
+                                int size = inverterSocket.getInputStream().read(bBuffer);
 
-                                    logger.debug("<<<<< DEBUG >>>>> Inverter::tcpConnectionThread Receiving data on TCP socket. Size received: " + size);
-                                    if (size == bufferSize) {
-                                        logger.error("<<<<< ERROR >>>>> Inverter::tcpConnectionThread Buffer size is too small.");
-                                    }
-
-                                    if (size != -1) {
-
-                                        byte[] bBufferFinal = new byte[size];
-                                        for (int j = 0; j < bBufferFinal.length; j++) {
-                                            bBufferFinal[j] = bBuffer[j];
-                                        }
-
-                                        dataStorage = new JsonObject(); //initialize the JSON which returns the data later
-
-                                        String finalString = Helper.byteArray2String(bBufferFinal);
-
-                                        logger.debug("<<<<< DEBUG >>>>> Inverter::tcpConnectionThread raw string received: " + finalString);
-
-                                        //Cut stream into possible messages (frames)
-                                        List<String> resultStrings = split2B(finalString);    //split input string according to spec at 2B unless preceeded by 2D as escape sign
-
-                                        //clean the string array, only keep entries which seem to be
-                                        if (resultStrings != null && resultStrings.size() > 0) {
-                                            List<String> resultStrings3 = cleanResultArray(resultStrings);
-
-                                            for (String s : resultStrings3) {
-                                                processResultString(s);
-                                            }
-                                        }
-                                    } else {
-                                        logger.debug("<<<<< DEBUG >>>>> Inverter::tcpConnectionThread Network stream to inverter was closed.");
-                                        inverterSocket = new Socket(config.getHostname(), config.getPort());
-                                    }
-
-                                } catch (IOException e) {
-                                    logger.error("<<<<< ERROR >>>>> Inverter::tcpConnectionThread IO Exception when connecting to inverter.");
-                                    e.printStackTrace();
+                                logger.debug("<<<<< DEBUG >>>>> Inverter::tcpConnectionThread Receiving data on TCP socket. Size received: " + size);
+                                if (size == bufferSize) {
+                                    logger.error("<<<<< ERROR >>>>> Inverter::tcpConnectionThread Buffer size is too small.");
                                 }
+
+                                if (size != -1) {
+
+                                    byte[] bBufferFinal = new byte[size];
+                                    System.arraycopy(bBuffer, 0, bBufferFinal, 0, bBufferFinal.length);
+
+                                    String finalString = Helper.byteArray2String(bBufferFinal);
+
+                                    logger.debug("<<<<< DEBUG >>>>> Inverter::tcpConnectionThread raw string received: " + finalString);
+
+                                    //Cut stream into possible messages (frames)
+                                    List<String> resultStrings = split2B(finalString);    //split input string according to spec at 2B unless preceeded by 2D as escape sign
+
+                                    //clean the string array, only keep entries which seem to be
+                                    if (resultStrings != null && resultStrings.size() > 0) {
+                                        List<String> resultStrings3 = cleanResultArray(resultStrings);
+
+                                        for (String s : resultStrings3) {
+                                            processResultString(s);
+                                        }
+                                    }
+                                } else {
+                                    logger.debug("<<<<< DEBUG >>>>> Inverter::tcpConnectionThread Network stream to inverter was closed.");
+                                    inverterSocket = new Socket(config.getHostname(), config.getPort());
+                                }
+
+                            } catch (IOException e) {
+                                logger.error("<<<<< ERROR >>>>> Inverter::tcpConnectionThread IO Exception when connecting to inverter.");
+                                e.printStackTrace();
                             }
-                            logger.info("<<<<< INFO >>>>> Inverter::tcpConnectionThread Thread connecting to inverter has been stopped.");
                         }
+                        logger.info("<<<<< INFO >>>>> Inverter::tcpConnectionThread Thread connecting to inverter has been stopped.");
                     });
             tcpConnectionThread.setName("TCPConnectionThreadRctInverter");
             tcpConnectionThread.start();
@@ -289,6 +283,7 @@ public class Inverter {
 
     void processResultString(String inputString) {
         try {
+            var dataStorage = new JsonObject();
             //check if short (05) or long (06) response
             String responseType = inputString.substring(0, 2);
 
@@ -373,7 +368,7 @@ public class Inverter {
                     //don't do anything, we know that this value is a string //TODO: Implement later
                 }
             } else {
-                logger.warn("<<<<< DEBUG >>>>> Inverter::processResultString string contains unknown magic number (not listed in CSV): " + key);
+                logger.debug("<<<<< DEBUG >>>>> Inverter::processResultString string contains unknown magic number (not listed in CSV): " + key);
                 dataStorage.addProperty("magicNumber", key);
                 dataStorage.addProperty("type", "unknown");
                 if (MagicNumber.magicNumberObjectMap.containsKey(key)) {
