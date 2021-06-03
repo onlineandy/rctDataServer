@@ -66,11 +66,11 @@ public class Inverter {
                                         logger.debug("<<<<< DEBUG >>>>> Inverter::tcpConnectionThread raw string received: " + finalString);
 
                                         //Cut stream into possible messages (frames)
-                                        List<String> resultStrings2 = split2B(finalString);    //split input string according to spec at 2B unless preceeded by 2D as escape sign
+                                        List<String> resultStrings = split2B(finalString);    //split input string according to spec at 2B unless preceeded by 2D as escape sign
 
                                         //clean the string array, only keep entries which seem to be
-                                        if (resultStrings2 != null && resultStrings2.size() > 0) {
-                                            List<String> resultStrings3 = cleanResultArray(resultStrings2);
+                                        if (resultStrings != null && resultStrings.size() > 0) {
+                                            List<String> resultStrings3 = cleanResultArray(resultStrings);
 
                                             for (String s : resultStrings3) {
                                                 processResultString(s);
@@ -373,11 +373,13 @@ public class Inverter {
                     //don't do anything, we know that this value is a string //TODO: Implement later
                 }
             } else {
-                logger.debug("<<<<< DEBUG >>>>> Inverter::processResultString string contains unknown magic number (not listed in CSV): " + key);
+                logger.warn("<<<<< DEBUG >>>>> Inverter::processResultString string contains unknown magic number (not listed in CSV): " + key);
                 dataStorage.addProperty("magicNumber", key);
                 dataStorage.addProperty("type", "unknown");
-                MagicNumber.magicNumberObjectMap.get(key).setDataJson(dataStorage);
-                MagicNumber.magicNumberObjectMap.get(key).setDataReady(true);
+                if (MagicNumber.magicNumberObjectMap.containsKey(key)) {
+                    MagicNumber.magicNumberObjectMap.get(key).setDataJson(dataStorage);
+                    MagicNumber.magicNumberObjectMap.get(key).setDataReady(true);
+                }
             }
 
             logger.debug("<<<<< DEBUG >>>>> Inverter::processResultString string is valid, json produced is: " + dataStorage);
