@@ -1,6 +1,5 @@
 1AC87AA0;Current house power usage in W;short;rctdb;PowerHouse
 91617C58;Public grid power in W negativ if feed in;short;rctdb;PowerGrid
-6A9FFA2;Total charge into from battery;short;rctdb;BatCharge
 2BC1E72B;Total charge flow from battery;short;rctdb;BatDischarge
 DB11855B;DC input power A in W;short;rctdb;PowerDcInputA
 0CB5D21B;DC input power B in W;short;rctdb;PowerDcInputB
