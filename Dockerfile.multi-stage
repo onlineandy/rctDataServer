@@ -4,5 +4,5 @@ WORKDIR /build
 RUN mvn clean package -B
  
 FROM openjdk:11-jdk
-COPY --from=0 "/build/target/rctDataServer-*-SNAPSHOT.jar" app.jar
-CMD [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar" ]
+COPY --from=0 "/build/target/rctDataServer-*.jar" app.jar
+CMD [ "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar" ]
